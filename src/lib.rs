@@ -5,16 +5,15 @@ use std::str::FromStr;
 pub type Coord = (u32, u32);
 
 pub struct BBox {
-    pub ll: Coord,
-    pub tr: Coord,
+    pub x: u32,
+    pub y: u32,
+    pub w: u32,
+    pub h: u32,
 }
 
 impl BBox {
-    pub fn new(ll: Coord, tr: Coord) -> Self {
-        BBox {
-            ll,
-            tr,
-        }
+    pub fn new(x: u32, y: u32, w: u32, h: u32) -> Self {
+        BBox { x, y, w, h }
     }
 }
 
@@ -68,11 +67,21 @@ impl Namer {
     }
 }
 
-pub fn matrix(w: u32, h: u32) -> Vec<Coord> {
-    let (ww, hh) = ((0..w), 0..h);
-    let rw: Vec<u32> = ww.collect();
-    let rh: Vec<u32> = hh.collect();
-    rw.iter().flat_map(|&ww| rh.iter().map(|&hh| (ww, hh)).collect::<Vec<Coord>>()).collect()
+pub fn matrix(dim: (u32, u32), sz: u32) -> Vec<BBox> {
+    let (w, h) = (dim.0 / sz, dim.1 / sz);
+    let (rx, ry) = (dim.0 % sz, dim.1 % sz);
+
+    let (xc, yc) = ((0..w), 0..h);
+    let mut xc: Vec<(u32, u32)> = xc.map(|i| (i * sz, sz)).collect();
+    let mut yc: Vec<(u32, u32)> = yc.map(|i| (i * sz, sz)).collect();
+    if rx > 0 {
+        xc.push((xc.len() as u32 * sz, rx));
+    }
+    if ry > 0 {
+        yc.push((yc.len() as u32 * sz, ry));
+    }
+
+    xc.iter().flat_map(|&ww| yc.iter().map(|&hh| BBox::new(ww.0, hh.0, ww.1,  hh.1)).collect::<Vec<BBox>>()).collect()
 }
 
 

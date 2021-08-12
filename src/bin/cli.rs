@@ -4,7 +4,7 @@ use clap::Clap;
 use image::{GenericImage, GenericImageView};
 use rayon::prelude::*;
 
-use libchip::{Coord, Namer, matrix};
+use libchip::{Coord, Namer, matrix, BBox};
 use libchip::ImageType::Jpeg;
 use std::io;
 use std::io::Write;
@@ -38,14 +38,11 @@ fn main() {
     let t = std::time::SystemTime::now();
     let source = image::open(&opts.path).expect("cant open");
     let (w, h) = source.dimensions();
-    let (cw, ch) = (w / sz, h / sz);
 
-    let v: Vec<Coord> = matrix(cw, ch);
-    v.par_iter().for_each(|(cx, cy)| {
-        let xo = cx * sz;
-        let yo = cy * sz;
-        let name = namer.make(&key(xo, yo), Jpeg);
-        match source.clone().sub_image(xo, yo, sz, sz).to_image().save(name) {
+    let v: Vec<BBox> = matrix((w, h), sz);
+    v.par_iter().for_each(|b| {
+        let name = namer.make(&key(b.x, b.y), Jpeg);
+        match source.clone().sub_image(b.x, b.y, b.w, b.h).to_image().save(name) {
             Ok(_) => print!("."),
             Err(_) => print!("x")
         };
