@@ -2,7 +2,10 @@ use std::path::Path;
 
 use clap::Clap;
 use image::{GenericImage, GenericImageView};
-use rayon::borrow::BorrowMut;
+use rayon::prelude::*;
+
+use libchip::ImageType::Jpeg;
+use libchip::Namer;
 
 #[derive(Clap)]
 #[clap(name = "Chipper")]
@@ -28,15 +31,10 @@ fn main() {
     let opts: Opts = Opts::parse();
 
     let sz = opts.size;
-    let source_file = Path::new(&opts.path);
-    let output_path = opts.outdir.unwrap_or("./".into());
-    let output_fmt = opts.format;
-    let base_name: String = source_file.file_name().unwrap().to_str().unwrap().into();
-    let source_ext = source_file.extension().unwrap().to_str().unwrap() ;
-    let base_name = base_name.strip_suffix(&format!(".{}", source_ext)).unwrap();
+    let namer = Namer::new(&opts.path, opts.outdir);
 
     let t = std::time::SystemTime::now();
-    let source = image::open(&source_file).expect("cant open");
+    let source = image::open(&opts.path).expect("cant open");
     let (w, h) = source.dimensions();
     let (cw, ch) = (w / sz, h / sz);
     let (rw, rh) = ((0..cw), 0..ch);
@@ -47,8 +45,8 @@ fn main() {
     v.par_iter().for_each(|(cx, cy)| {
         let xo = cx * sz;
         let yo = cy * sz;
-        let output_path = format!("{}/{}-{}x{}.{}", output_path, base_name, xo, yo, &output_fmt);
-        match source.clone().sub_image(xo, yo, sz, sz).to_image().save(output_path) {
+        let name = namer.get(&format!("{}x{}", xo, yo), Jpeg);
+        match source.clone().sub_image(xo, yo, sz, sz).to_image().save(name) {
             Ok(_) => print!("."),
             Err(_) => print!("x")
         };
