@@ -4,3 +4,14 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
+image = "0.22"
+rayon = "1.5"
+clap = "3.0.0-beta.2"
+
+[lib]
+name = "libchip"
+path = "src/lib.rs"
+
+[[bin]]
+name = "chipper"
+path = "src/bin/cli.rs"
