@@ -2,6 +2,22 @@ use std::path::Path;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
+pub type Coord = (u32, u32);
+
+pub struct BBox {
+    pub ll: Coord,
+    pub tr: Coord,
+}
+
+impl BBox {
+    pub fn new(ll: Coord, tr: Coord) -> Self {
+        BBox {
+            ll,
+            tr,
+        }
+    }
+}
+
 pub enum ImageType {
     Jpeg,
     Png,
@@ -10,7 +26,7 @@ pub enum ImageType {
 impl Display for ImageType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            ImageType::Jpeg=> f.write_str("jpg"),
+            ImageType::Jpeg => f.write_str("jpg"),
             ImageType::Png => f.write_str("png"),
         }
     }
@@ -47,9 +63,16 @@ impl Namer {
         }
     }
 
-    pub fn get(&self, key: &str, fmt: ImageType) -> String {
+    pub fn make(&self, key: &str, fmt: ImageType) -> String {
         format!("{}/{}-{}.{}", self.base, self.name, key, fmt)
     }
+}
+
+pub fn matrix(w: u32, h: u32) -> Vec<Coord> {
+    let (ww, hh) = ((0..w), 0..h);
+    let rw: Vec<u32> = ww.collect();
+    let rh: Vec<u32> = hh.collect();
+    rw.iter().flat_map(|&ww| rh.iter().map(|&hh| (ww, hh)).collect::<Vec<Coord>>()).collect()
 }
 
 
@@ -60,7 +83,7 @@ mod tests {
     #[test]
     fn namer_relative() {
         let namer = Namer::new("foo.tiff", Some("rel".into()));
-        let name = namer.get("bar", ImageType::Jpeg);
+        let name = namer.make("bar", ImageType::Jpeg);
         assert_eq!("rel/foo-bar.jpg", name);
     }
 }
