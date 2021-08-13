@@ -4,16 +4,20 @@ use clap::Clap;
 #[clap(name = "Chipper")]
 /// Image in, images out
 pub struct Opts {
-    /// Source image
+    /// Input image
     pub path: String,
 
-    /// Chip size
+    /// Output chip size
     #[clap(short, long, default_value = "544")]
     pub size: u32,
 
-    /// Chip format
+    /// Output chip format
     #[clap(long, default_value = "jpg")]
     pub format: String,
+
+    /// Max input image size (GB)
+    #[clap(long, default_value = "1")]
+    pub mem: u8,
 
     /// Output directory
     #[clap(short, long)]

@@ -14,8 +14,9 @@ fn main() {
     let sz = opts.size;
 
     let t = std::time::SystemTime::now();
-    let source = open_tif(&opts.path).unwrap();
+    let source = open_tif(&opts.path, opts.mem).unwrap();
     let (w, h) = source.dimensions();
+    println!("{} x {}", w, h);
 
     let v: Vec<BBox> = matrix((w, h), sz);
     let namer = Namer::new(&opts.path, opts.outdir);
