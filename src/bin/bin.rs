@@ -1,29 +1,11 @@
+use std::str::FromStr;
+
 use clap::Clap;
 use image::{GenericImage, GenericImageView};
 use rayon::prelude::*;
 
-use libchip::{BBox, matrix, Namer, open_tif, ImageType};
-use std::str::FromStr;
-
-#[derive(Clap)]
-#[clap(name = "Chipper")]
-/// Image in, images out
-struct Opts {
-    /// Source image
-    path: String,
-
-    /// Chip size
-    #[clap(short, long, default_value = "544")]
-    size: u32,
-
-    /// Chip format
-    #[clap(long, default_value = "jpg")]
-    format: String,
-
-    /// Output directory
-    #[clap(short, long)]
-    outdir: Option<String>,
-}
+use libchip::{BBox, ImageType, matrix, Namer, open_tif};
+use libchip::cli::Opts;
 
 fn main() {
     let opts: Opts = Opts::parse();

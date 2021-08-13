@@ -6,6 +6,8 @@ use tiff::decoder::DecodingResult;
 use std::io::BufReader;
 use std::fs::File;
 
+pub mod cli;
+
 pub type Coord = (u32, u32);
 
 pub struct BBox {
