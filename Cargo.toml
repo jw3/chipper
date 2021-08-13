@@ -15,4 +15,4 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "chipper"
-path = "src/bin/cli.rs"
+path = "src/bin/bin.rs"
