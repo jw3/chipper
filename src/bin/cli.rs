@@ -5,7 +5,7 @@ use image::{GenericImage, GenericImageView};
 use rayon::prelude::*;
 
 use libchip::{BBox, ImageType, matrix, Namer, open_tif};
-use libchip::cli::Opts;
+use libchip::args::Opts;
 
 fn main() {
     let opts: Opts = Opts::parse();

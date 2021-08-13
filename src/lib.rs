@@ -7,7 +7,7 @@ use std::io::BufReader;
 use std::fs::File;
 use tiff::TiffError;
 
-pub mod cli;
+pub mod args;
 
 pub type Coord = (u32, u32);
 
