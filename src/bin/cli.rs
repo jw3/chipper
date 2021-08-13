@@ -1,13 +1,9 @@
-use std::path::Path;
-
 use clap::Clap;
 use image::{GenericImage, GenericImageView};
 use rayon::prelude::*;
 
-use libchip::{Coord, Namer, matrix, BBox};
-use libchip::ImageType::Jpeg;
-use std::io;
-use std::io::Write;
+use libchip::{BBox, matrix, Namer, open_tif, ImageType};
+use std::str::FromStr;
 
 #[derive(Clap)]
 #[clap(name = "Chipper")]
@@ -31,17 +27,19 @@ struct Opts {
 
 fn main() {
     let opts: Opts = Opts::parse();
+    let outfmt = ImageType::from_str(&opts.format).expect("Invalid image format");
 
     let sz = opts.size;
-    let namer = Namer::new(&opts.path, opts.outdir);
 
     let t = std::time::SystemTime::now();
-    let source = image::open(&opts.path).expect("cant open");
+    let source = open_tif(&opts.path).unwrap();
     let (w, h) = source.dimensions();
 
     let v: Vec<BBox> = matrix((w, h), sz);
+    let namer = Namer::new(&opts.path, opts.outdir);
+
     v.par_iter().for_each(|b| {
-        let name = namer.make(&key(b.x, b.y), Jpeg);
+        let name = namer.make(&key(b.x, b.y), outfmt);
         match source.clone().sub_image(b.x, b.y, b.w, b.h).to_image().save(name) {
             Ok(_) => print!("."),
             Err(_) => print!("x")

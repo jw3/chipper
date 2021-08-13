@@ -1,6 +1,10 @@
 use std::path::Path;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use image::{DynamicImage, ImageBuffer};
+use tiff::decoder::DecodingResult;
+use std::io::BufReader;
+use std::fs::File;
 
 pub type Coord = (u32, u32);
 
@@ -17,6 +21,7 @@ impl BBox {
     }
 }
 
+#[derive(Copy, Clone)]
 pub enum ImageType {
     Jpeg,
     Png,
@@ -81,7 +86,27 @@ pub fn matrix(dim: (u32, u32), sz: u32) -> Vec<BBox> {
         yc.push((yc.len() as u32 * sz, ry));
     }
 
-    xc.iter().flat_map(|&ww| yc.iter().map(|&hh| BBox::new(ww.0, hh.0, ww.1,  hh.1)).collect::<Vec<BBox>>()).collect()
+    xc.iter().flat_map(|&ww| yc.iter().map(|&hh| BBox::new(ww.0, hh.0, ww.1, hh.1)).collect::<Vec<BBox>>()).collect()
+}
+
+pub fn open_tif(path: &str) -> Result<DynamicImage, String> {
+    let mut limits = tiff::decoder::Limits::default();
+    limits.decoding_buffer_size = 3 * 1024 * 1024 * 1024;
+
+    let f = File::open(path).expect("failed to open file");
+    let r = BufReader::new(&f);
+    let mut d = tiff::decoder::Decoder::new(r).expect("bad decoder").with_limits(limits);
+
+    match d.read_image().unwrap() {
+        DecodingResult::U8(raw) => {
+            let (w, h) = d.dimensions().unwrap();
+            match ImageBuffer::from_raw(w, h, raw).map(DynamicImage::ImageRgb8) {
+                Some(x) => Ok(x),
+                None => Err("Failed to convert to dynamic image".into())
+            }
+        }
+        _ => Err("Decoded unsupported result".into())
+    }
 }
 
 
