@@ -102,7 +102,7 @@ pub fn open_tif(path: &str) -> Result<DynamicImage, String> {
     match d.read_image().unwrap() {
         DecodingResult::U8(raw) => {
             let (w, h) = d.dimensions().unwrap();
-            match ImageBuffer::from_raw(w, h, raw).map(DynamicImage::ImageRgb8) {
+            match ImageBuffer::from_raw(w, h, raw).map(DynamicImage::ImageRgba8) {
                 Some(x) => Ok(x),
                 None => Err("Failed to convert to dynamic image".into())
             }
