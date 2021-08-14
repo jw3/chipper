@@ -8,6 +8,7 @@ use std::fs::File;
 use tiff::TiffError;
 
 pub mod args;
+pub mod widgets;
 
 pub type Coord = (u32, u32);
 

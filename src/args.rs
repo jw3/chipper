@@ -23,3 +23,15 @@ pub struct Opts {
     #[clap(short, long)]
     pub outdir: Option<String>,
 }
+
+#[derive(Clap)]
+#[clap(name = "Chipper GUI")]
+/// Image in, GUI out
+pub struct GuiOpts {
+    /// Input image
+    pub path: String,
+
+    /// Max input image size (GB)
+    #[clap(long, default_value = "1")]
+    pub mem: u8,
+}
