@@ -11,17 +11,33 @@ use image::{GenericImageView, FilterType, SubImage, GenericImage, DynamicImage};
 use std::time::SystemTime;
 use gtk::gdk::{EventButton, EventKey};
 
-pub struct Win {
-    model: Model,
+pub struct App {
+    state: State,
     widgets: Widgets,
 }
 
-
-pub struct Model {
+pub struct State {
     pub full_image: DynamicImage,
     pub chip_size: u32,
     pub coords: (u32, u32),
     pub bounds: Cells,
+}
+
+impl State {
+    pub fn new(full_image: DynamicImage, chip_size: u32) -> Self {
+        let (w, h) = full_image.dimensions();
+        State {
+            full_image,
+            chip_size,
+            coords: (0, 0),
+            bounds: Cells {
+                w: w / chip_size,
+                h: h / chip_size,
+                wr: w % chip_size,
+                hr: h % chip_size,
+            }
+        }
+    }
 }
 
 pub struct Cells {
@@ -31,8 +47,8 @@ pub struct Cells {
     pub hr: u32,
 }
 
-impl Model {
-    pub fn chip(&mut self, id: (u32, u32), sz: (u32, u32)) -> Buffer {
+impl State {
+    fn chip(&mut self, id: (u32, u32), sz: (u32, u32)) -> Buffer {
         let (x, y, w, h) = (id.0 * sz.0, id.1 * sz.1, sz.0, sz.1);
         let bytes = self.full_image.sub_image(x, y, w, h).to_image().into_raw();
         Buffer {
@@ -41,39 +57,35 @@ impl Model {
             bytes,
         }
     }
-    pub fn up(&mut self) -> Option<(u32, u32, u32, u32)> {
+    fn up(&mut self) -> Option<(u32, u32, u32, u32)> {
         if self.coords.1 > 0 {
             self.coords = (self.coords.0, self.coords.1 - 1);
             Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        }
-        else {
+        } else {
             None
         }
     }
-    pub fn down(&mut self) -> Option<(u32, u32, u32, u32)> {
+    fn down(&mut self) -> Option<(u32, u32, u32, u32)> {
         if self.coords.1 < self.bounds.h - 1 {
             self.coords = (self.coords.0, self.coords.1 + 1);
             Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        }
-        else {
+        } else {
             None
         }
     }
-    pub fn left(&mut self) -> Option<(u32, u32, u32, u32)> {
+    fn left(&mut self) -> Option<(u32, u32, u32, u32)> {
         if self.coords.0 > 0 {
             self.coords = (self.coords.0 - 1, self.coords.1);
             Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        }
-        else {
+        } else {
             None
         }
     }
-    pub fn right(&mut self) -> Option<(u32, u32, u32, u32)> {
+    fn right(&mut self) -> Option<(u32, u32, u32, u32)> {
         if self.coords.0 < self.bounds.w - 1 {
             self.coords = (self.coords.0 + 1, self.coords.1);
             Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        }
-        else {
+        } else {
             None
         }
     }
@@ -91,13 +103,13 @@ struct Widgets {
     main_window: Window,
 }
 
-impl Update for Win {
-    type Model = Model;
-    type ModelParam = Model;
+impl Update for App {
+    type Model = State;
+    type ModelParam = (DynamicImage, u32);
     type Msg = Msg;
 
-    fn model(_: &Relm<Self>, model: Model) -> Model {
-        model
+    fn model(_: &Relm<Self>, param: (DynamicImage, u32)) -> State {
+        State::new(param.0, param.1)
     }
 
     fn update(&mut self, event: Msg) {
@@ -105,13 +117,13 @@ impl Update for Win {
             Msg::InputEvent(e) => {
                 if let Some(letter) = e.keyval().to_unicode() {
                     if let Some((x, y, w, h)) = match letter {
-                        'w' => self.model.up(),
-                        's' => self.model.down(),
-                        'a' => self.model.left(),
-                        'd' => self.model.right(),
+                        'w' => self.state.up(),
+                        's' => self.state.down(),
+                        'a' => self.state.left(),
+                        'd' => self.state.right(),
                         _ => None,
                     } {
-                        let chip = self.model.chip((x, y), (w, h));
+                        let chip = self.state.chip((x, y), (w, h));
                         let b = Bytes::from_owned(chip.bytes);
                         let pb = Pixbuf::from_bytes(&b, Colorspace::Rgb, true, 8, chip.w as i32, chip.h as i32, chip.w as i32 * 4);
                         self.widgets.image_widget.set_from_pixbuf(Some(&pb));
@@ -123,21 +135,21 @@ impl Update for Win {
     }
 }
 
-impl Widget for Win {
+impl Widget for App {
     type Root = Window;
 
-    fn root(&self) -> Self::Root {
-        self.widgets.main_window.clone()
-    }
-
     fn init_view(&mut self) {
-        let chip = self.model.chip((0, 0), (self.model.chip_size, self.model.chip_size));
+        let chip = self.state.chip((0, 0), (self.state.chip_size, self.state.chip_size));
         let b = Bytes::from_owned(chip.bytes);
         let pb = Pixbuf::from_bytes(&b, Colorspace::Rgb, true, 8, chip.w as i32, chip.h as i32, chip.w as i32 * 4);
         self.widgets.image_widget.set_from_pixbuf(Some(&pb));
     }
 
-    fn view(relm: &Relm<Self>, model: Self::Model) -> Self {
+    fn root(&self) -> Self::Root {
+        self.widgets.main_window.clone()
+    }
+
+    fn view(relm: &Relm<Self>, state: Self::Model) -> Self {
         let glade_src = include_str!("resources/chipper.glade");
         let builder = Builder::from_string(glade_src);
 
@@ -149,8 +161,8 @@ impl Widget for Win {
 
         main_window.show_all();
 
-        Win {
-            model,
+        App {
+            state,
             widgets: Widgets {
                 image_widget,
                 main_window,
