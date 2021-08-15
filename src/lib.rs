@@ -93,10 +93,11 @@ pub fn matrix(dim: (u32, u32), sz: u32) -> Vec<BBox> {
     xc.iter().flat_map(|&ww| yc.iter().map(|&hh| BBox::new(ww.0, hh.0, ww.1, hh.1)).collect::<Vec<BBox>>()).collect()
 }
 
-struct Buffer {
-    w: u32,
-    h: u32,
-    bytes: Vec<u8>,
+#[derive(Clone)]
+pub struct Buffer {
+    pub w: u32,
+    pub h: u32,
+    pub bytes: Vec<u8>,
 }
 
 fn load_tif_buffer(path: &str, mem: u8) -> Result<Buffer, String> {

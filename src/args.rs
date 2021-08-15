@@ -34,4 +34,8 @@ pub struct GuiOpts {
     /// Max input image size (GB)
     #[clap(long, default_value = "1")]
     pub mem: u8,
+
+    /// Chip size
+    #[clap(short, long, default_value = "544")]
+    pub size: u32,
 }
