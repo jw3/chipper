@@ -7,7 +7,8 @@ use gtk::gdk_pixbuf::Pixbuf;
 use crate::{load_tif_buffer, Buffer, load_tif_image};
 use gtk::gdk::gdk_pixbuf::Colorspace;
 use gtk::glib::Bytes;
-use image::{GenericImageView, FilterType, SubImage, GenericImage};
+use image::{GenericImageView, FilterType, SubImage, GenericImage, DynamicImage};
+use std::time::SystemTime;
 
 pub struct Win {
     model: Model,
@@ -21,6 +22,13 @@ pub enum ImageSource {
 
 pub struct Model {
     source: ImageSource
+}
+
+impl Model {
+    // pub fn chip(&mut self, id: (u32, u32), sz: u32) -> DynamicImage {
+    //     let (x, y) = (id.0 * sz,id.1 * sz);
+    //     self.full_image.sub_image(x,y, sz, sz).
+    // }
 }
 
 #[derive(Msg)]
@@ -75,15 +83,20 @@ impl Widget for Win {
         let imgbuf=  match &model.source {
             ImageSource::File(path) => {
                 let mut y = load_tif_image(path ,3).unwrap();
+                let y = y.sub_image(0, 0, 544, 544);
+                //let y = load_tif_buffer(path, 3).unwrap();
+                let t = SystemTime::now();
+                //let y = y.resize_exact(y.width()/8,y.height()/8,FilterType::Triangle);
+                let d = t.elapsed().unwrap();
+                println!("{}", d.as_millis());
                 // let x = y.sub_image(0, 0, 544, 544);
 
                 //let z = y.resize_exact(y.width()/4,y.height()/4, FilterType::Nearest);
                 //z.save("/tmp/fooxxxxxxxxxxxx2.jpg").unwrap();
                 let w = y.dimensions().0 as i32;
                 let h = y.dimensions().1 as i32;
-                let b = Bytes::from_owned(y.raw_pixels());
-                // let stride = Pixbuf::calculate_rowstride(Colorspace::Rgb, false, 8, 780, 430);
-                let pb = Pixbuf::from_bytes(&b, Colorspace::Rgb, true, 8, w, h, w*4);
+                let b = Bytes::from_owned(y.to_image().into_raw());
+                let pb = Pixbuf::from_bytes(&b, Colorspace::Rgb, true, 8, w as i32, h as i32, w as i32*4);
                 image_widget.set_from_pixbuf(Some(&pb));
 
                 //image_widget.set_from_file("/tmp/fooxxxxxxxxxxxx2.jpg");
