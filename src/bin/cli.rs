@@ -4,7 +4,7 @@ use clap::Clap;
 use image::{GenericImage, GenericImageView};
 use rayon::prelude::*;
 
-use libchip::{BBox, ImageType, matrix, Namer, open_tif};
+use libchip::{BBox, ImageType, matrix, Namer, load_tif_image};
 use libchip::args::Opts;
 
 fn main() {
@@ -14,7 +14,7 @@ fn main() {
     let sz = opts.size;
 
     let t = std::time::SystemTime::now();
-    let source = open_tif(&opts.path, opts.mem).unwrap();
+    let source = load_tif_image(&opts.path, opts.mem).unwrap();
     let (w, h) = source.dimensions();
     println!("{} x {}", w, h);
 

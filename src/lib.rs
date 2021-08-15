@@ -93,7 +93,13 @@ pub fn matrix(dim: (u32, u32), sz: u32) -> Vec<BBox> {
     xc.iter().flat_map(|&ww| yc.iter().map(|&hh| BBox::new(ww.0, hh.0, ww.1, hh.1)).collect::<Vec<BBox>>()).collect()
 }
 
-pub fn open_tif(path: &str, mem: u8) -> Result<DynamicImage, String> {
+pub struct Buffer {
+    pub w: u32,
+    pub h: u32,
+    pub bytes: Vec<u8>,
+}
+
+pub fn load_tif_buffer(path: &str, mem: u8) -> Result<Buffer, String> {
     let mut limits = tiff::decoder::Limits::default();
     limits.decoding_buffer_size = giga_bytes(mem);
 
@@ -102,15 +108,24 @@ pub fn open_tif(path: &str, mem: u8) -> Result<DynamicImage, String> {
     let mut d = tiff::decoder::Decoder::new(r).expect("bad decoder").with_limits(limits);
 
     match d.read_image() {
-        Ok(DecodingResult::U8(raw)) => {
+        Ok(DecodingResult::U8(bytes)) => {
             let (w, h) = d.dimensions().unwrap();
-            match ImageBuffer::from_raw(w, h, raw).map(DynamicImage::ImageRgba8) {
-                Some(x) => Ok(x),
-                None => Err("Failed to convert to dynamic image".into())
-            }
+            Ok(Buffer {
+                w,
+                h,
+                bytes,
+            })
         }
         Err(TiffError::LimitsExceeded) => Err(format!("Memory limit of {} gb exceeded, try --mem", mem)),
         _ => Err("Decoded unsupported result".into())
+    }
+}
+
+pub fn load_tif_image(path: &str, mem: u8) -> Result<DynamicImage, String> {
+    let buf = load_tif_buffer(path, mem).unwrap();
+    match ImageBuffer::from_raw(buf.w, buf.h, buf.bytes).map(DynamicImage::ImageRgba8) {
+        Some(x) => Ok(x),
+        None => Err("Failed to convert to dynamic image".into())
     }
 }
 

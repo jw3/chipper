@@ -3,14 +3,20 @@ use gtk::{Window, Image, Inhibit, Builder};
 use relm::{connect, Relm, Update, Widget, WidgetTest};
 use relm_derive::Msg;
 use gtk::prelude::{WidgetExt, BuilderExtManual, ImageExt};
+use gtk::gdk_pixbuf::Pixbuf;
+use crate::{load_tif_buffer, Buffer, load_tif_image};
+use gtk::gdk::gdk_pixbuf::Colorspace;
+use gtk::glib::Bytes;
+use image::{GenericImageView, FilterType, SubImage, GenericImage};
 
 pub struct Win {
     model: Model,
     widgets: Widgets,
+    imgbuf: Option<Buffer>,
 }
 
 pub enum ImageSource {
-    File(String)
+    File(String),
 }
 
 pub struct Model {
@@ -66,11 +72,26 @@ impl Widget for Win {
 
         let image_widget: Image = builder.object("image_widget").unwrap();
 
-        match &model.source {
+        let imgbuf=  match &model.source {
             ImageSource::File(path) => {
-                image_widget.set_from_file(path)
-            }
-        }
+                let mut y = load_tif_image(path ,3).unwrap();
+                // let x = y.sub_image(0, 0, 544, 544);
+
+                //let z = y.resize_exact(y.width()/4,y.height()/4, FilterType::Nearest);
+                //z.save("/tmp/fooxxxxxxxxxxxx2.jpg").unwrap();
+                let w = y.dimensions().0 as i32;
+                let h = y.dimensions().1 as i32;
+                let b = Bytes::from_owned(y.raw_pixels());
+                // let stride = Pixbuf::calculate_rowstride(Colorspace::Rgb, false, 8, 780, 430);
+                let pb = Pixbuf::from_bytes(&b, Colorspace::Rgb, true, 8, w, h, w*4);
+                image_widget.set_from_pixbuf(Some(&pb));
+
+                //image_widget.set_from_file("/tmp/fooxxxxxxxxxxxx2.jpg");
+
+
+                None
+            },
+        };
 
         main_window.show_all();
 
@@ -80,6 +101,7 @@ impl Widget for Win {
                 image_widget,
                 main_window,
             },
+            imgbuf,
         }
     }
 }
