@@ -83,7 +83,7 @@ impl Widget for Win {
         let imgbuf=  match &model.source {
             ImageSource::File(path) => {
                 let mut y = load_tif_image(path ,3).unwrap();
-                let y = y.sub_image(0, 0, 544, 544);
+                let y = y.sub_image(0, 0, 544*5, 544*5);
                 //let y = load_tif_buffer(path, 3).unwrap();
                 let t = SystemTime::now();
                 //let y = y.resize_exact(y.width()/8,y.height()/8,FilterType::Triangle);
