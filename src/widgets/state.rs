@@ -1,17 +1,16 @@
-use gtk::{Window, Image, Inhibit, Builder};
+use gtk::{Builder, Image, Inhibit, Window};
 
+use crate::widgets::Cells;
+use crate::{load_tif_buffer, load_tif_image, Buffer};
+use gtk::gdk::gdk_pixbuf::Colorspace;
+use gtk::gdk::{EventButton, EventKey};
+use gtk::gdk_pixbuf::Pixbuf;
+use gtk::glib::Bytes;
+use gtk::prelude::{BuilderExtManual, ImageExt, WidgetExt};
+use image::{DynamicImage, FilterType, GenericImage, GenericImageView, SubImage};
 use relm::{connect, Relm, Update, Widget, WidgetTest};
 use relm_derive::Msg;
-use gtk::prelude::{WidgetExt, BuilderExtManual, ImageExt};
-use gtk::gdk_pixbuf::Pixbuf;
-use crate::{load_tif_buffer, Buffer, load_tif_image};
-use gtk::gdk::gdk_pixbuf::Colorspace;
-use gtk::glib::Bytes;
-use image::{GenericImageView, FilterType, SubImage, GenericImage, DynamicImage};
 use std::time::SystemTime;
-use gtk::gdk::{EventButton, EventKey};
-use crate::widgets::Cells;
-
 
 pub struct State {
     pub full_image: DynamicImage,
@@ -19,7 +18,6 @@ pub struct State {
     pub coords: (u32, u32),
     pub bounds: Cells,
 }
-
 
 impl State {
     pub fn new(full_image: DynamicImage, chip_size: u32) -> Self {
@@ -33,18 +31,14 @@ impl State {
                 h: h / chip_size,
                 wr: w % chip_size,
                 hr: h % chip_size,
-            }
+            },
         }
     }
 
     pub fn chip(&mut self, id: (u32, u32), sz: (u32, u32)) -> Buffer {
         let (x, y, w, h) = (id.0 * sz.0, id.1 * sz.1, sz.0, sz.1);
         let bytes = self.full_image.sub_image(x, y, w, h).to_image().into_raw();
-        Buffer {
-            w,
-            h,
-            bytes,
-        }
+        Buffer { w, h, bytes }
     }
     pub fn up(&mut self) -> Option<(u32, u32, u32, u32)> {
         if self.coords.1 > 0 {

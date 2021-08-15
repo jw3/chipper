@@ -1,25 +1,23 @@
-use gtk::{Window, Image, Inhibit, Builder};
+use gtk::{Builder, Image, Inhibit, Window};
 
-use relm::{connect, Relm, Update, Widget, WidgetTest};
-use relm_derive::Msg;
-use gtk::prelude::{WidgetExt, BuilderExtManual, ImageExt};
-use gtk::gdk_pixbuf::Pixbuf;
-use crate::{load_tif_buffer, Buffer, load_tif_image};
-use gtk::gdk::gdk_pixbuf::Colorspace;
-use gtk::glib::Bytes;
-use image::{GenericImageView, FilterType, SubImage, GenericImage, DynamicImage};
-use std::time::SystemTime;
-use gtk::gdk::{EventButton, EventKey};
-use crate::widgets::event::{Msg};
+use crate::widgets::event::Msg;
 use crate::widgets::state::State;
 use crate::widgets::Widgets;
-
+use crate::{load_tif_buffer, load_tif_image, Buffer};
+use gtk::gdk::gdk_pixbuf::Colorspace;
+use gtk::gdk::{EventButton, EventKey};
+use gtk::gdk_pixbuf::Pixbuf;
+use gtk::glib::Bytes;
+use gtk::prelude::{BuilderExtManual, ImageExt, WidgetExt};
+use image::{DynamicImage, FilterType, GenericImage, GenericImageView, SubImage};
+use relm::{connect, Relm, Update, Widget, WidgetTest};
+use relm_derive::Msg;
+use std::time::SystemTime;
 
 pub struct App {
     state: State,
     widgets: Widgets,
 }
-
 
 impl Update for App {
     type Model = State;
@@ -43,7 +41,15 @@ impl Update for App {
                     } {
                         let chip = self.state.chip((x, y), (w, h));
                         let b = Bytes::from_owned(chip.bytes);
-                        let pb = Pixbuf::from_bytes(&b, Colorspace::Rgb, true, 8, chip.w as i32, chip.h as i32, chip.w as i32 * 4);
+                        let pb = Pixbuf::from_bytes(
+                            &b,
+                            Colorspace::Rgb,
+                            true,
+                            8,
+                            chip.w as i32,
+                            chip.h as i32,
+                            chip.w as i32 * 4,
+                        );
                         self.widgets.image_widget.set_from_pixbuf(Some(&pb));
                     }
                 }
@@ -57,9 +63,19 @@ impl Widget for App {
     type Root = Window;
 
     fn init_view(&mut self) {
-        let chip = self.state.chip((0, 0), (self.state.chip_size, self.state.chip_size));
+        let chip = self
+            .state
+            .chip((0, 0), (self.state.chip_size, self.state.chip_size));
         let b = Bytes::from_owned(chip.bytes);
-        let pb = Pixbuf::from_bytes(&b, Colorspace::Rgb, true, 8, chip.w as i32, chip.h as i32, chip.w as i32 * 4);
+        let pb = Pixbuf::from_bytes(
+            &b,
+            Colorspace::Rgb,
+            true,
+            8,
+            chip.w as i32,
+            chip.h as i32,
+            chip.w as i32 * 4,
+        );
         self.widgets.image_widget.set_from_pixbuf(Some(&pb));
     }
 
@@ -72,8 +88,18 @@ impl Widget for App {
         let builder = Builder::from_string(glade_src);
 
         let main_window: Window = builder.object("main_window").unwrap();
-        connect!(relm, main_window, connect_delete_event(_, _), return (Some(Msg::Quit), Inhibit(false)));
-        connect!(relm, main_window, connect_key_press_event(_, e), return (Some(Msg::InputEvent(e.clone())), Inhibit(false)));
+        connect!(
+            relm,
+            main_window,
+            connect_delete_event(_, _),
+            return (Some(Msg::Quit), Inhibit(false))
+        );
+        connect!(
+            relm,
+            main_window,
+            connect_key_press_event(_, e),
+            return (Some(Msg::InputEvent(e.clone())), Inhibit(false))
+        );
 
         let image_widget: Image = builder.object("image_widget").unwrap();
 
