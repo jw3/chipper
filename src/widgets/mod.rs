@@ -12,7 +12,6 @@ pub struct Cells {
     pub hr: u32,
 }
 
-#[derive(Clone)]
 struct Widgets {
     image_widget: Image,
     main_window: Window,

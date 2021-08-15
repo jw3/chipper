@@ -99,7 +99,6 @@ pub fn matrix(dim: (u32, u32), sz: u32) -> Vec<BBox> {
         .collect()
 }
 
-#[derive(Clone)]
 pub struct Buffer {
     pub w: u32,
     pub h: u32,
