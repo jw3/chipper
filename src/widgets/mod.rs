@@ -1,4 +1,4 @@
-use gtk::gdk::EventKey;
+
 use gtk::{Image, Window};
 
 pub mod app;

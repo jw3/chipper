@@ -1,16 +1,7 @@
-use gtk::{Builder, Image, Inhibit, Window};
+use image::{DynamicImage, GenericImage, GenericImageView};
 
 use crate::widgets::Cells;
-use crate::{load_tif_buffer, load_tif_image, Buffer};
-use gtk::gdk::gdk_pixbuf::Colorspace;
-use gtk::gdk::{EventButton, EventKey};
-use gtk::gdk_pixbuf::Pixbuf;
-use gtk::glib::Bytes;
-use gtk::prelude::{BuilderExtManual, ImageExt, WidgetExt};
-use image::{DynamicImage, FilterType, GenericImage, GenericImageView, SubImage};
-use relm::{connect, Relm, Update, Widget, WidgetTest};
-use relm_derive::Msg;
-use std::time::SystemTime;
+use crate::Buffer;
 
 pub struct State {
     pub full_image: DynamicImage,

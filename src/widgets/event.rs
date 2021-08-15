@@ -1,5 +1,5 @@
 use gtk::gdk::EventKey;
-use relm::{connect, Relm, Update, Widget, WidgetTest};
+
 use relm_derive::Msg;
 
 #[derive(Msg)]
