@@ -1,8 +1,8 @@
 use clap::Clap;
 
 use relm::Widget;
-
-use libchip::widgets::{App, Cells};
+use libchip::widgets::app::App;
+use libchip::widgets::{ Cells};
 use libchip::args::GuiOpts;
 use libchip::{load_tif_image, Buffer};
 use image::{GenericImage, GenericImageView};

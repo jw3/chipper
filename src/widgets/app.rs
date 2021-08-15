@@ -10,98 +10,16 @@ use gtk::glib::Bytes;
 use image::{GenericImageView, FilterType, SubImage, GenericImage, DynamicImage};
 use std::time::SystemTime;
 use gtk::gdk::{EventButton, EventKey};
+use crate::widgets::event::{Msg};
+use crate::widgets::state::State;
+use crate::widgets::Widgets;
+
 
 pub struct App {
     state: State,
     widgets: Widgets,
 }
 
-pub struct State {
-    pub full_image: DynamicImage,
-    pub chip_size: u32,
-    pub coords: (u32, u32),
-    pub bounds: Cells,
-}
-
-impl State {
-    pub fn new(full_image: DynamicImage, chip_size: u32) -> Self {
-        let (w, h) = full_image.dimensions();
-        State {
-            full_image,
-            chip_size,
-            coords: (0, 0),
-            bounds: Cells {
-                w: w / chip_size,
-                h: h / chip_size,
-                wr: w % chip_size,
-                hr: h % chip_size,
-            }
-        }
-    }
-}
-
-pub struct Cells {
-    pub w: u32,
-    pub h: u32,
-    pub wr: u32,
-    pub hr: u32,
-}
-
-impl State {
-    fn chip(&mut self, id: (u32, u32), sz: (u32, u32)) -> Buffer {
-        let (x, y, w, h) = (id.0 * sz.0, id.1 * sz.1, sz.0, sz.1);
-        let bytes = self.full_image.sub_image(x, y, w, h).to_image().into_raw();
-        Buffer {
-            w,
-            h,
-            bytes,
-        }
-    }
-    fn up(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.1 > 0 {
-            self.coords = (self.coords.0, self.coords.1 - 1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        } else {
-            None
-        }
-    }
-    fn down(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.1 < self.bounds.h - 1 {
-            self.coords = (self.coords.0, self.coords.1 + 1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        } else {
-            None
-        }
-    }
-    fn left(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.0 > 0 {
-            self.coords = (self.coords.0 - 1, self.coords.1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        } else {
-            None
-        }
-    }
-    fn right(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.0 < self.bounds.w - 1 {
-            self.coords = (self.coords.0 + 1, self.coords.1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
-        } else {
-            None
-        }
-    }
-}
-
-#[derive(Msg)]
-pub enum Msg {
-    InputEvent(EventKey),
-    Quit,
-}
-
-#[derive(Clone)]
-struct Widgets {
-    image_widget: Image,
-    main_window: Window,
-}
 
 impl Update for App {
     type Model = State;
@@ -150,7 +68,7 @@ impl Widget for App {
     }
 
     fn view(relm: &Relm<Self>, state: Self::Model) -> Self {
-        let glade_src = include_str!("resources/chipper.glade");
+        let glade_src = include_str!("../resources/chipper.glade");
         let builder = Builder::from_string(glade_src);
 
         let main_window: Window = builder.object("main_window").unwrap();
