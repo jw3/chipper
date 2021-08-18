@@ -9,10 +9,15 @@ use relm::{connect, Relm, Update, Widget};
 use crate::widgets::event::Msg;
 use crate::widgets::state::State;
 use crate::widgets::Widgets;
+use gtk::gdk::{EventKey, ModifierType};
 
 pub struct App {
     state: State,
     widgets: Widgets,
+}
+
+fn with_ctrl(e: &EventKey) -> bool {
+    e.state().contains(ModifierType::CONTROL_MASK)
 }
 
 impl Update for App {
@@ -33,6 +38,14 @@ impl Update for App {
                         's' => self.state.down(),
                         'a' => self.state.left(),
                         'd' => self.state.right(),
+                        'j' if with_ctrl(&e) => {
+                            println!("save jpg");
+                            None
+                        }
+                        'p' if with_ctrl(&e) => {
+                            println!("save png");
+                            None
+                        }
                         _ => None,
                     } {
                         let chip = self.state.chip((x, y), (w, h));

@@ -1,13 +1,13 @@
 use image::{DynamicImage, GenericImage, GenericImageView};
 
-use crate::widgets::Cells;
+use crate::widgets::{Grid, Rect};
 use crate::Buffer;
 
 pub struct State {
     pub full_image: DynamicImage,
     pub chip_size: u32,
-    pub coords: (u32, u32),
-    pub bounds: Cells,
+    pub bounds: Rect,
+    pub grid: Grid,
 }
 
 impl State {
@@ -16,8 +16,8 @@ impl State {
         State {
             full_image,
             chip_size,
-            coords: (0, 0),
-            bounds: Cells {
+            bounds: Rect::default(),
+            grid: Grid {
                 w: w / chip_size,
                 h: h / chip_size,
                 wr: w % chip_size,
@@ -32,33 +32,36 @@ impl State {
         Buffer { w, h, bytes }
     }
     pub fn up(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.1 > 0 {
-            self.coords = (self.coords.0, self.coords.1 - 1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
+        if self.bounds.y > 0 {
+            self.bounds = Rect {
+                y: self.bounds.y - 1,
+                ..self.bounds
+            };
+            Some((self.bounds.0, self.bounds.1, self.chip_size, self.chip_size))
         } else {
             None
         }
     }
     pub fn down(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.1 < self.bounds.h - 1 {
-            self.coords = (self.coords.0, self.coords.1 + 1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
+        if self.bounds.1 < self.grid.h - 1 {
+            self.bounds = (self.bounds.0, self.bounds.1 + 1);
+            Some((self.bounds.0, self.bounds.1, self.chip_size, self.chip_size))
         } else {
             None
         }
     }
     pub fn left(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.0 > 0 {
-            self.coords = (self.coords.0 - 1, self.coords.1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
+        if self.bounds.0 > 0 {
+            self.bounds = (self.bounds.0 - 1, self.bounds.1);
+            Some((self.bounds.0, self.bounds.1, self.chip_size, self.chip_size))
         } else {
             None
         }
     }
     pub fn right(&mut self) -> Option<(u32, u32, u32, u32)> {
-        if self.coords.0 < self.bounds.w - 1 {
-            self.coords = (self.coords.0 + 1, self.coords.1);
-            Some((self.coords.0, self.coords.1, self.chip_size, self.chip_size))
+        if self.bounds.0 < self.grid.w - 1 {
+            self.bounds = (self.bounds.0 + 1, self.bounds.1);
+            Some((self.bounds.0, self.bounds.1, self.chip_size, self.chip_size))
         } else {
             None
         }
