@@ -8,6 +8,12 @@ image = "0.23"
 rayon = "1.5"
 clap = "3.0.0-beta.2"
 tiff = "0.7"
+relm = "0.22.0"
+relm-derive = "0.22.0"
+
+[dependencies.gtk]
+version = "0.14.0"
+features = ["v3_22_29"]
 
 [lib]
 name = "libchip"
@@ -15,4 +21,12 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "chipper"
-path = "src/bin/bin.rs"
+path = "src/bin/cli.rs"
+
+[[bin]]
+name = "chipper-gui"
+path = "src/bin/gui.rs"
+required-features = ["gui"]
+
+[features]
+gui = []
