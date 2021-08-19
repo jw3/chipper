@@ -33,7 +33,7 @@ impl Update for App {
         match event {
             Msg::InputEvent(e) => {
                 if let Some(letter) = e.keyval().to_unicode() {
-                    if let Some((x, y, w, h)) = match letter {
+                    if let Some(r) = match letter {
                         'w' => self.state.up(),
                         's' => self.state.down(),
                         'a' => self.state.left(),
@@ -48,7 +48,7 @@ impl Update for App {
                         }
                         _ => None,
                     } {
-                        let chip = self.state.chip((x, y), (w, h));
+                        let chip = self.state.chip(r);
                         let b = Bytes::from_owned(chip.bytes);
                         let pb = Pixbuf::from_bytes(
                             &b,
@@ -72,9 +72,7 @@ impl Widget for App {
     type Root = Window;
 
     fn init_view(&mut self) {
-        let chip = self
-            .state
-            .chip((0, 0), (self.state.chip_size, self.state.chip_size));
+        let chip = self.state.chip(self.state.bounds);
         let b = Bytes::from_owned(chip.bytes);
         let pb = Pixbuf::from_bytes(
             &b,
