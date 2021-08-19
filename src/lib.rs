@@ -8,6 +8,8 @@ use tiff::decoder::DecodingResult;
 use tiff::TiffError;
 
 pub mod args;
+
+#[cfg(feature = "gui")]
 pub mod gui;
 
 pub type Coord = (u32, u32);

@@ -27,3 +27,7 @@ path = "src/bin/cli.rs"
 [[bin]]
 name = "chipper-gui"
 path = "src/bin/gui.rs"
+required-features = ["gui"]
+
+[features]
+gui = []
