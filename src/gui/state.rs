@@ -56,7 +56,7 @@ impl State {
             None
         }
     }
-    pub fn down(&mut self) -> Option<(Rect)> {
+    pub fn down(&mut self) -> Option<Rect> {
         if self.pos.1 + 1 < self.grid.h {
             self.pos = (self.pos.0, self.pos.1 + 1);
             self.bounds = Rect {
@@ -68,26 +68,26 @@ impl State {
             None
         }
     }
-    pub fn left(&mut self) -> Option<(Rect)> {
+    pub fn left(&mut self) -> Option<Rect> {
         if self.pos.0 > 0 {
             self.pos = (self.pos.0 - 1, self.pos.1);
             self.bounds = Rect {
                 x: self.pos.0 * self.chip_size,
                 ..self.bounds
             };
-            Some((self.bounds))
+            Some(self.bounds)
         } else {
             None
         }
     }
-    pub fn right(&mut self) -> Option<(Rect)> {
+    pub fn right(&mut self) -> Option<Rect> {
         if self.pos.0 + 1 < self.grid.w {
             self.pos = (self.pos.0 + 1, self.pos.1);
             self.bounds = Rect {
                 x: self.pos.0 * self.chip_size,
                 ..self.bounds
             };
-            Some((self.bounds))
+            Some(self.bounds)
         } else {
             None
         }
