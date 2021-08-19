@@ -1,6 +1,6 @@
 use image::{DynamicImage, GenericImage, GenericImageView};
 
-use crate::widgets::{Grid, Rect};
+use crate::gui::{Grid, Rect};
 use crate::Buffer;
 
 pub struct State {

@@ -1,11 +1,9 @@
 use clap::Clap;
-
+use relm::Widget;
 
 use libchip::args::GuiOpts;
-use libchip::widgets::app::App;
-
-use libchip::{load_tif_image};
-use relm::Widget;
+use libchip::gui::app::App;
+use libchip::load_tif_image;
 
 fn main() {
     let opts = GuiOpts::parse();

@@ -6,14 +6,14 @@ use gtk::{Builder, Image, Inhibit, Window};
 use image::DynamicImage;
 use relm::{connect, Relm, Update, Widget};
 
-use crate::widgets::event::Msg;
-use crate::widgets::state::State;
-use crate::widgets::Widgets;
+use crate::gui::event::Msg;
+use crate::gui::state::State;
+use crate::gui::Widgets;
 use gtk::gdk::{EventKey, ModifierType};
 
 pub struct App {
     state: State,
-    widgets: Widgets,
+    gui: Widgets,
 }
 
 fn with_ctrl(e: &EventKey) -> bool {
@@ -59,7 +59,7 @@ impl Update for App {
                             chip.h as i32,
                             chip.w as i32 * 4,
                         );
-                        self.widgets.image_widget.set_from_pixbuf(Some(&pb));
+                        self.gui.image_widget.set_from_pixbuf(Some(&pb));
                     }
                 }
             }
@@ -83,11 +83,11 @@ impl Widget for App {
             chip.h as i32,
             chip.w as i32 * 4,
         );
-        self.widgets.image_widget.set_from_pixbuf(Some(&pb));
+        self.gui.image_widget.set_from_pixbuf(Some(&pb));
     }
 
     fn root(&self) -> Self::Root {
-        self.widgets.main_window.clone()
+        self.gui.main_window.clone()
     }
 
     fn view(relm: &Relm<Self>, state: Self::Model) -> Self {
@@ -114,7 +114,7 @@ impl Widget for App {
 
         App {
             state,
-            widgets: Widgets {
+            gui: Widgets {
                 image_widget,
                 main_window,
             },

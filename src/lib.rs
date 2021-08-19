@@ -8,7 +8,7 @@ use tiff::decoder::DecodingResult;
 use tiff::TiffError;
 
 pub mod args;
-pub mod widgets;
+pub mod gui;
 
 pub type Coord = (u32, u32);
 
