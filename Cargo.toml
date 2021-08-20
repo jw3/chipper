@@ -8,12 +8,20 @@ image = "0.23"
 rayon = "1.5"
 clap = "3.0.0-beta.2"
 tiff = "0.7"
-relm = "0.22.0"
-relm-derive = "0.22.0"
 
 [dependencies.gtk]
 version = "0.14.0"
 features = ["v3_22_29"]
+optional = true
+
+[dependencies.relm]
+version = "0.22"
+optional = true
+
+[dependencies.relm-derive]
+version = "0.22"
+optional = true
+
 
 [lib]
 name = "libchip"
@@ -29,4 +37,4 @@ path = "src/bin/gui.rs"
 required-features = ["gui"]
 
 [features]
-gui = []
+gui = ["gtk", "relm", "relm-derive"]
